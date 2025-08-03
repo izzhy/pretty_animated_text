@@ -20,7 +20,8 @@ class ChimeBellText extends StatefulWidget {
   final TextAlignment textAlignment;
   final Duration duration;
   final TextStyle? textStyle;
-  final VoidCallback? onFinished; // Added callback
+  final VoidCallback? onFinished;
+  final bool trigger; // Changed to boolean value
 
   const ChimeBellText({
     super.key,
@@ -31,7 +32,8 @@ class ChimeBellText extends StatefulWidget {
     this.textStyle,
     this.type = AnimationType.word,
     this.duration = const Duration(milliseconds: 200),
-    this.onFinished, // Added callback
+    this.onFinished,
+    this.trigger = false, // Default to false
   });
 
   @override
@@ -43,6 +45,7 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
   late List<Animation<double>> _opacities;
   late List<Animation<double>> _rotations;
   late final List<EffectDto> _data;
+  bool _previousTrigger = false;
 
   @override
   void initState() {
@@ -92,9 +95,24 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
       );
     }).toList();
 
-    _controller.addStatusListener(_handleAnimationStatus); // Add listener
+    _controller.addStatusListener(_handleAnimationStatus);
 
-    _controller.forward();
+    // Start animation if trigger is true
+    if (widget.trigger) {
+      _controller.forward();
+    }
+    _previousTrigger = widget.trigger;
+  }
+
+  @override
+  void didUpdateWidget(ChimeBellText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Check if trigger changed from false to true
+    if (!_previousTrigger && widget.trigger) {
+      _controller.forward();
+    }
+    _previousTrigger = widget.trigger;
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
@@ -107,7 +125,7 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
 
   @override
   void dispose() {
-    _controller.removeStatusListener(_handleAnimationStatus); // Remove listener
+    _controller.removeStatusListener(_handleAnimationStatus);
     _controller.dispose();
     super.dispose();
   }

@@ -22,6 +22,7 @@ class ChimeBellText extends StatefulWidget {
   final TextStyle? textStyle;
   final VoidCallback? onFinished;
   final bool trigger; // Changed to boolean value
+  final bool finishOnTap; // Show full text immediately when tapped
 
   const ChimeBellText({
     super.key,
@@ -34,6 +35,7 @@ class ChimeBellText extends StatefulWidget {
     this.duration = const Duration(milliseconds: 200),
     this.onFinished,
     this.trigger = false, // Default to false
+    this.finishOnTap = false, // Default to false
   });
 
   @override
@@ -154,9 +156,14 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
     _controller.repeat(reverse: reverse);
   }
 
+  void finishAnimation() {
+    _controller.forward();
+    _controller.value = 1.0; // Jump to the end of animation
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    Widget textWidget = Wrap(
       alignment: wrapAlignmentByTextAlign(widget.textAlignment),
       children: _data
           .map(
@@ -173,6 +180,19 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
           )
           .toList(),
     );
+
+    if (widget.finishOnTap) {
+      return GestureDetector(
+        onTap: () {
+          if (_controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse) {
+            finishAnimation();
+          }
+        },
+        child: textWidget,
+      );
+    }
+
+    return textWidget;
   }
 
   Opacity _animatedBuilder(EffectDto data, Widget? child) {

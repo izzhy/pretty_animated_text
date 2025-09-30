@@ -157,8 +157,11 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
   }
 
   void finishAnimation() {
-    _controller.forward();
     _controller.value = 1.0; // Jump to the end of animation
+    // Manually trigger onFinished callback since we're bypassing normal completion
+    if (widget.onFinished != null) {
+      widget.onFinished!();
+    }
   }
 
   @override

@@ -119,9 +119,7 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
-      if (widget.onFinished != null) {
-        widget.onFinished!();
-      }
+      finishAnimation();
     }
   }
 

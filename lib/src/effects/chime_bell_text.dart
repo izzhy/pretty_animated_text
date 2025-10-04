@@ -21,6 +21,7 @@ class ChimeBellText extends StatefulWidget {
   final TextAlignment textAlignment;
   final Duration duration;
   final TextStyle? textStyle;
+  final VoidCallback? onStart;
   final VoidCallback? onFinished;
   final bool trigger; // Changed to boolean value
   final bool finishOnTap; // Show full text immediately when tapped
@@ -34,6 +35,7 @@ class ChimeBellText extends StatefulWidget {
     this.textStyle,
     this.type = AnimationType.word,
     this.duration = const Duration(milliseconds: 200),
+    this.onStart,
     this.onFinished,
     this.trigger = false, // Default to false
     this.finishOnTap = false, // Default to false
@@ -102,6 +104,7 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
 
     // Start animation if trigger is true
     if (widget.trigger) {
+      _triggerOnStart();
       _controller.forward();
     }
     _previousTrigger = widget.trigger;
@@ -113,9 +116,16 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
 
     // Check if trigger changed from false to true
     if (!_previousTrigger && widget.trigger) {
+      _triggerOnStart();
       _controller.forward();
     }
     _previousTrigger = widget.trigger;
+  }
+
+  void _triggerOnStart() {
+    if (widget.onStart != null) {
+      widget.onStart!();
+    }
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
@@ -133,6 +143,7 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
 
 // Public methods to control the animation
   void playAnimation() {
+    _triggerOnStart();
     _controller.forward();
   }
 
@@ -147,11 +158,13 @@ class ChimeBellTextState extends State<ChimeBellText> with SingleTickerProviderS
   void restartAnimation() {
     _controller.reset();
     Future.delayed(const Duration(milliseconds: 10), () {
+      _triggerOnStart();
       _controller.animationByMode(widget.mode);
     });
   }
 
   void repeatAnimation({bool reverse = false}) {
+    _triggerOnStart();
     _controller.repeat(reverse: reverse);
   }
 
